@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <project>
+    <modelVersion>4.0.0</modelVersion>
+   
+    <groupId>org.ilaborie.less</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0.0.qualifier</version>
+    <packaging>pom</packaging>
+   
+    <modules>
+      <module>Plugins</module>
+      <module>externals</module>
+    </modules>
+
+    <properties>
+      <tycho-version>0.15.0</tycho-version>
+          <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+          <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+
+    <repositories>
+      <!-- Building for Juno -->
+     <repository>
+       <id>juno</id>
+       <layout>p2</layout>
+       <url>http://download.eclipse.org/releases/juno</url>
+     </repository>
+     <!-- With Guava -->
+     <repository>
+       <id>Guava</id>
+       <layout>p2</layout>
+       <url>http://guava-osgi.googlecode.com/svn/trunk/repository</url>
+     </repository>
+     <!-- With Orbit -->
+     <repository>
+       <id>Orbit</id>
+       <layout>p2</layout>
+       <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository</url>
+     </repository>
+    </repositories>
+
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-maven-plugin</artifactId>
+          <version>${tycho-version}</version>
+          <extensions>true</extensions>
+        </plugin>
+      </plugins>
+    </build>
+
+  </project>

@@ -6,7 +6,8 @@
          name="Less Builder"
          point="org.eclipse.core.resources.builders">
       <builder
-            hasNature="true">
+            hasNature="true"
+            isConfigurable="true">
          <run
                class="org.ilaborie.less.eclipse.builder.LessBuilder">
          </run>

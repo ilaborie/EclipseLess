@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <project>
+      <modelVersion>4.0.0</modelVersion>
+      <parent>
+        <groupId>org.ilaborie.less</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.0.0.qualifier</version>
+      </parent>
+     
+      
+      <artifactId>plugins</artifactId>
+        <packaging>pom</packaging>
+     
+      <modules>
+        <module>org.ilaborie.less.eclipse</module>
+      </modules>
+
+    </project>
