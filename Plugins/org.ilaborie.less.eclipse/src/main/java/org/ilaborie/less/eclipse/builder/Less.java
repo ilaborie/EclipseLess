@@ -1,19 +1,28 @@
 package org.ilaborie.less.eclipse.builder;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 
 /**
  * The Class Less.
@@ -28,6 +37,19 @@ public class Less implements IProjectNature {
 
 	/** The project. */
 	private IProject project;
+
+	private boolean compress = false;
+
+	/** The files. */
+	private final List<String> files;
+
+	/**
+	 * Instantiates a new less.
+	 */
+	public Less() {
+		super();
+		this.files = Lists.newArrayList();
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -51,6 +73,14 @@ public class Less implements IProjectNature {
 			desc.setBuildSpec(Iterables.toArray(cmds, ICommand.class));
 			this.project.setDescription(desc, null);
 		}
+	}
+
+	public boolean isCompress() {
+		return compress;
+	}
+
+	protected List<String> getFiles() {
+		return files;
 	}
 
 	/*
@@ -94,6 +124,49 @@ public class Less implements IProjectNature {
 	 */
 	public void setProject(IProject project) {
 		this.project = project;
+
+		//
+		IPath workingLocation = project.getWorkingLocation(NATURE_ID);
+		File file = new File(workingLocation.toFile(), "options");
+		Charset utf8 = Charsets.UTF_8;
+		String separator = ";";
+		try {
+			if (file.exists()) {
+				log.info("Read file: {}", file);
+				List<String> lines = Files.readLines(file, utf8);
+				this.compress = false;
+				if (!lines.isEmpty()) {
+					this.compress = Boolean.valueOf(lines.get(0));
+					this.files.clear();
+					if (lines.size() == 2) {
+						Iterable<String> split = Splitter.on(separator).split(
+								lines.get(1));
+						this.files.addAll(Lists.newArrayList(split));
+					}
+				}
+			} else {
+				log.info("Store default properties to file: {}", file);
+				String f = Joiner.on(separator).join(this.files);
+
+				Files.createParentDirs(file.getParentFile());
+				Files.append(String.valueOf(this.compress), file, utf8);
+				Files.append(f, file, utf8);
+			}
+		} catch (IOException e) {
+			this.log.error(e.toString(), e);
+		}
 	}
 
+	/**
+	 * Apply.
+	 * 
+	 * @param ifile
+	 *            the ifile
+	 * @return true, if successful
+	 */
+	public boolean apply(IFile ifile) {
+		String path = ifile.getLocation().toPortableString();
+		return (this.files.isEmpty() && ifile.getName().endsWith(".less"))
+				|| (this.files.contains(path));
+	}
 }

@@ -107,12 +107,6 @@ public class LessBuilder extends IncrementalProjectBuilder {
 	/** The Constant MARKER_TYPE. */
 	private static final String MARKER_TYPE = "org.ilaborie.less.eclipse.lessProblem";
 
-	/** The file to compile. */
-	private Predicate<IFile> fileToCompile;
-
-	/** The compress. */
-	private boolean compress;
-
 	/** The less exception pattern. */
 	private Pattern lessExceptionPattern = Pattern
 			.compile(".*\\QSyntax Error on line \\E(.*)");
@@ -122,12 +116,6 @@ public class LessBuilder extends IncrementalProjectBuilder {
 	 */
 	public LessBuilder() {
 		super();
-		this.fileToCompile = new Predicate<IFile>() {
-			public boolean apply(IFile file) {
-				return (file != null) && (file.getName().endsWith(".less"));
-			}
-		};
-		this.compress = true;
 	}
 
 	/**
@@ -191,8 +179,12 @@ public class LessBuilder extends IncrementalProjectBuilder {
 	 *            the ifile
 	 */
 	protected void buildLess(IFile ifile, IProgressMonitor monitor) {
-		if (this.fileToCompile.apply(ifile)) {
+		Less less = new Less();
+		less.setProject(ifile.getProject());
+
+		if (less.apply(ifile)) {
 			try {
+
 				this.deleteMarkers(ifile);
 				this.log.debug("Compile Less for {}", ifile);
 				File file = ifile.getRawLocation().makeAbsolute().toFile();
@@ -206,7 +198,7 @@ public class LessBuilder extends IncrementalProjectBuilder {
 				// Configure
 				LessCompiler compiler = new LessCompiler();
 				compiler.setEncoding(ifile.getCharset());
-				compiler.setCompress(this.compress);
+				compiler.setCompress(less.isCompress());
 
 				// Compile
 				monitor.subTask("Compile " + ifile.getLocation());
