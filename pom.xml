@@ -10,6 +10,7 @@
     <modules>
       <module>Plugins</module>
       <module>externals</module>
+      <module>Features</module>
     </modules>
 
     <properties>
