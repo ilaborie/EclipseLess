@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?><target name="Running Platform" sequenceNumber="20">
+<locations>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="com.google.guava.sdk.feature.feature.group" version="11.0.1"/>
+<repository location="http://guava-osgi.googlecode.com/svn/trunk/repository/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="ch.qos.logback.slf4j" version="1.0.0.v20120123-1500"/>
+<unit id="ch.qos.logback.slf4j.source" version="1.0.0.v20120123-1500"/>
+<unit id="org.slf4j.api" version="1.6.4.v20120130-2120"/>
+<unit id="org.slf4j.ext" version="1.6.4.v20120130-2120"/>
+<unit id="org.slf4j.ext.source" version="1.6.4.v20120130-2120"/>
+<unit id="org.slf4j.api.source" version="1.6.4.v20120130-2120"/>
+<unit id="org.slf4j.jul" version="1.6.4.v20120130-2120"/>
+<unit id="org.slf4j.jul.source" version="1.6.4.v20120130-2120"/>
+<unit id="org.slf4j.jcl" version="1.6.4.v20120130-2120"/>
+<unit id="org.slf4j.jcl.source" version="1.6.4.v20120130-2120"/>
+<unit id="org.slf4j.log4j" version="1.6.4.v20120130-2120"/>
+<unit id="org.slf4j.log4j.source" version="1.6.4.v20120130-2120"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository/"/>
+</location>
+<location path="/Users/igor/Developpement/Eclipses/eclipse-3.8" type="Profile"/>
+</locations>
+<environment>
+<os>macosx</os>
+<ws>cocoa</ws>
+<arch>x86_64</arch>
+<nl>fr_FR</nl>
+</environment>
+<launcherArgs>
+<vmArgs>-Xms40m -Xmx512m -Xdock:icon=../Resources/Eclipse.icns -XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgs>
+</launcherArgs>
+</target>

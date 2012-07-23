@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Eclipse Less Compiler
+Bundle-SymbolicName: org.ilaborie.less.eclipse;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.ilaborie.less.eclipse.internal.Activator
+Bundle-Vendor: Igor Laborie <ilaborie@gmail.com
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Import-Package: com.google.common.base,
+ com.google.common.collect,
+ com.google.common.io,
+ org.lesscss,
+ org.slf4j
