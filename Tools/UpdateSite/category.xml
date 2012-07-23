@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.ilaborie.less.eclipse.feature_1.0.0.qualifier.jar" id="org.ilaborie.less.eclipse.feature" version="1.0.0.qualifier">
+      <category name="org.ilaborie.less"/>
+   </feature>
+   <category-def name="org.ilaborie.less" label="Less"/>
+</site>

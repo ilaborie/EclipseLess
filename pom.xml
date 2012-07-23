@@ -11,6 +11,7 @@
       <module>Plugins</module>
       <module>externals</module>
       <module>Features</module>
+      <module>Tools</module>
     </modules>
 
     <properties>
