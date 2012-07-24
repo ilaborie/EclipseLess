@@ -13,6 +13,5 @@ Bundle-ActivationPolicy: lazy
 Import-Package: com.google.common.base,
  com.google.common.collect,
  com.google.common.io,
- org.eclipse.ui.dialogs,
  org.lesscss,
  org.slf4j
