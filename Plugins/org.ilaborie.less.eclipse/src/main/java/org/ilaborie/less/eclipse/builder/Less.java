@@ -2,7 +2,6 @@ package org.ilaborie.less.eclipse.builder;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 
 import org.eclipse.core.resources.ICommand;
@@ -11,7 +10,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.ilaborie.less.eclipse.functions.IFile2String;
+import org.ilaborie.less.eclipse.functions.LessCommandPredicate;
+import org.ilaborie.less.eclipse.functions.String2IFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +30,9 @@ import com.google.common.io.Files;
 /**
  * The Class Less.
  */
-public class Less implements IProjectNature {
+public class Less implements IProjectNature, IAdaptable, Predicate<IFile> {
+
+	private static final String SEPARATOR = ";";
 
 	/** ID of this project nature. */
 	public static final String NATURE_ID = "org.ilaborie.less.eclipse.Less";
@@ -38,10 +43,11 @@ public class Less implements IProjectNature {
 	/** The project. */
 	private IProject project;
 
+	/** The compress. */
 	private boolean compress = false;
 
 	/** The files. */
-	private final List<String> files;
+	private final List<IFile> files;
 
 	/**
 	 * Instantiates a new less.
@@ -54,6 +60,18 @@ public class Less implements IProjectNature {
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+	 */
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
+		if (IProject.class.equals(adapter)) {
+			return this.project;
+		}
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.core.resources.IProjectNature#configure()
 	 */
 	public void configure() throws CoreException {
@@ -61,7 +79,8 @@ public class Less implements IProjectNature {
 		IProjectDescription desc = this.project.getDescription();
 		List<ICommand> cmds = Lists.newArrayList(desc.getBuildSpec());
 
-		Iterable<ICommand> filter = Iterables.filter(cmds, new LessCommand());
+		Iterable<ICommand> filter = Iterables.filter(cmds,
+				new LessCommandPredicate());
 		if (!filter.iterator().hasNext()) {
 			this.log.info("Add Less Nature");
 			// Create a command
@@ -76,11 +95,32 @@ public class Less implements IProjectNature {
 	}
 
 	public boolean isCompress() {
-		return compress;
+		return this.compress;
 	}
 
-	protected List<String> getFiles() {
-		return files;
+	/**
+	 * Sets the compress.
+	 * 
+	 * @param compress
+	 *            the new compress
+	 */
+	public void setCompress(boolean compress) {
+		this.compress = compress;
+	}
+
+	/**
+	 * Sets the files.
+	 * 
+	 * @param files
+	 *            the new files
+	 */
+	public void setFiles(List<IFile> files) {
+		this.files.clear();
+		this.files.addAll(files);
+	}
+
+	public List<IFile> getFiles() {
+		return this.files;
 	}
 
 	/*
@@ -92,69 +132,90 @@ public class Less implements IProjectNature {
 		IProjectDescription description = this.getProject().getDescription();
 		List<ICommand> cmds = Lists.newArrayList(description.getBuildSpec());
 		Iterable<ICommand> commands = Iterables.filter(cmds,
-				Predicates.not(new LessCommand()));
+				Predicates.not(new LessCommandPredicate()));
 
 		description.setBuildSpec(Iterables.toArray(commands, ICommand.class));
 		this.project.setDescription(description, null);
 	}
 
-	private class LessCommand implements Predicate<ICommand> {
-		public boolean apply(ICommand command) {
-			return (command != null)
-					&& LessBuilder.BUILDER_ID.equals(command.getBuilderName());
-		}
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.core.resources.IProjectNature#getProject()
-	 */
 	public IProject getProject() {
 		return this.project;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.core.resources.IProjectNature#setProject(org.eclipse.core
-	 * .resources.IProject)
-	 */
 	public void setProject(IProject project) {
 		this.project = project;
 
-		//
-		IPath workingLocation = project.getWorkingLocation(NATURE_ID);
-		File file = new File(workingLocation.toFile(), "options");
-		Charset utf8 = Charsets.UTF_8;
-		String separator = ";";
+		// File
+		File file = this.getPropertiesFiles();
 		try {
 			if (file.exists()) {
-				log.info("Read file: {}", file);
-				List<String> lines = Files.readLines(file, utf8);
-				this.compress = false;
-				if (!lines.isEmpty()) {
-					this.compress = Boolean.valueOf(lines.get(0));
-					this.files.clear();
-					if (lines.size() == 2) {
-						Iterable<String> split = Splitter.on(separator).split(
-								lines.get(1));
-						this.files.addAll(Lists.newArrayList(split));
-					}
-				}
+				this.read(file);
 			} else {
-				log.info("Store default properties to file: {}", file);
-				String f = Joiner.on(separator).join(this.files);
-
-				Files.createParentDirs(file.getParentFile());
-				Files.append(String.valueOf(this.compress), file, utf8);
-				Files.append(f, file, utf8);
+				this.store();
 			}
 		} catch (IOException e) {
 			this.log.error(e.toString(), e);
 		}
+	}
+
+	/**
+	 * Read.
+	 * 
+	 * @param file
+	 *            the file
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
+	private void read(File file) throws IOException {
+		this.log.debug("Read file: {}", file);
+		List<String> lines = Files.readLines(file, Charsets.UTF_8);
+		this.compress = false;
+		if (!lines.isEmpty()) {
+			this.compress = Boolean.valueOf(lines.get(0));
+			this.files.clear();
+			if (lines.size() == 2) {
+				Iterable<String> split = Splitter.on(SEPARATOR).split(
+						lines.get(1));
+				Iterable<IFile> elements = Iterables.transform(Lists
+						.newArrayList(split), new String2IFile(this.project));
+				this.files.addAll(Lists.newArrayList(elements));
+			}
+		}
+	}
+
+	/**
+	 * Store.
+	 * 
+	 * @return true, if successful
+	 */
+	public boolean store() {
+		File file = this.getPropertiesFiles();
+		this.log.debug("Store default properties to file: {}", file);
+		String f = Joiner.on(SEPARATOR).join(
+				Iterables.transform(this.files, new IFile2String()));
+		try {
+			if (file.exists()) {
+				file.delete();
+			} else {
+				Files.createParentDirs(file.getParentFile());
+			}
+			Files.append(String.valueOf(this.compress)+"\n", file, Charsets.UTF_8);
+			Files.append(f, file, Charsets.UTF_8);
+			return true;
+		} catch (IOException e) {
+			this.log.error(e.toString(), e);
+			return false;
+		}
+	}
+
+	/**
+	 * Gets the properties files.
+	 * 
+	 * @return the properties files
+	 */
+	private File getPropertiesFiles() {
+		IPath workingLocation = project.getWorkingLocation(NATURE_ID);
+		return new File(workingLocation.toFile(), "options");
 	}
 
 	/**
@@ -165,8 +226,7 @@ public class Less implements IProjectNature {
 	 * @return true, if successful
 	 */
 	public boolean apply(IFile ifile) {
-		String path = ifile.getLocation().toPortableString();
 		return (this.files.isEmpty() && ifile.getName().endsWith(".less"))
-				|| (this.files.contains(path));
+				|| (this.files.contains(ifile));
 	}
 }

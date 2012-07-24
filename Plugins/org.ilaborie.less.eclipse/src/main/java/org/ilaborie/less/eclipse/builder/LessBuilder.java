@@ -20,8 +20,6 @@ import org.lesscss.LessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Predicate;
-
 /**
  * The Class LessBuilder.
  */
@@ -108,7 +106,7 @@ public class LessBuilder extends IncrementalProjectBuilder {
 	private static final String MARKER_TYPE = "org.ilaborie.less.eclipse.lessProblem";
 
 	/** The less exception pattern. */
-	private Pattern lessExceptionPattern = Pattern
+	private final Pattern lessExceptionPattern = Pattern
 			.compile(".*\\QSyntax Error on line \\E(.*)");
 
 	/**
@@ -127,7 +125,7 @@ public class LessBuilder extends IncrementalProjectBuilder {
 	 *            the message
 	 */
 	private void addError(IFile file, String message) {
-		addError(file, 1, message);
+		this.addError(file, 1, message);
 	}
 
 	/**
@@ -182,10 +180,9 @@ public class LessBuilder extends IncrementalProjectBuilder {
 		Less less = new Less();
 		less.setProject(ifile.getProject());
 
+		this.deleteMarkers(ifile);
 		if (less.apply(ifile)) {
 			try {
-
-				this.deleteMarkers(ifile);
 				this.log.debug("Compile Less for {}", ifile);
 				File file = ifile.getRawLocation().makeAbsolute().toFile();
 				String name = file.getName();
@@ -209,7 +206,7 @@ public class LessBuilder extends IncrementalProjectBuilder {
 				ifile.getParent().refreshLocal(1, monitor);
 			} catch (LessException e) {
 				String message = e.getMessage();
-				Matcher matcher = lessExceptionPattern.matcher(message);
+				Matcher matcher = this.lessExceptionPattern.matcher(message);
 				if (matcher.matches()) {
 					String sLine = matcher.group(1);
 					try {

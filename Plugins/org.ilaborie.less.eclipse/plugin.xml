@@ -1,83 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension
-         id="LessBuilder"
-         name="Less Builder"
-         point="org.eclipse.core.resources.builders">
-      <builder
-            hasNature="true"
-            isConfigurable="true">
-         <run
-               class="org.ilaborie.less.eclipse.builder.LessBuilder">
-         </run>
-      </builder>
-   </extension>
-   <extension
-         id="Less"
-         name="Less Project Nature"
-         point="org.eclipse.core.resources.natures">
-      <runtime>
-         <run
-               class="org.ilaborie.less.eclipse.builder.Less">
-         </run>
-      </runtime>
-      <builder
-            id="org.ilaborie.less.eclipse.LessBuilder">
-      </builder>
-   </extension>
-   <extension
-         id="lessProblem"
-         name="Less Problem"
-         point="org.eclipse.core.resources.markers">
-      <super
-            type="org.eclipse.core.resources.problemmarker">
-      </super>
-      <persistent
-            value="true">
-      </persistent>
-   </extension>
-   <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="popup:org.eclipse.ui.projectConfigure">
-         <command
-               commandId="less.eclipse.nature"
-               icon="icons/logo.png"
-               label="Toggle Less Nature"
-               style="push">
-         </command>
-      </menuContribution>
-   </extension>
-   <extension
-         point="org.eclipse.ui.commands">
-      <command
-            categoryId="less.eclipse.category"
-            id="less.eclipse.nature"
-            name="Toggle Less Nature">
-      </command>
-      <category
-            id="less.eclipse.category"
-            name="Less">
-      </category>
-   </extension>
-   <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            class="org.ilaborie.less.eclipse.handlers.ToggleLessNatureHandler"
-            commandId="less.eclipse.nature">
-      </handler>
-   </extension>
-   <extension
-         point="org.eclipse.core.contenttype.contentTypes">
-      <content-type
-            base-type="org.eclipse.core.runtime.text"
-            file-extensions="less"
-            id="less.eclipse.content-type"
-            name="Less"
-            priority="normal">
-      </content-type>
-   </extension>
-
+	<!-- Nature & Builder -->
+	<extension id="LessBuilder" name="Less Builder" point="org.eclipse.core.resources.builders">
+		<builder hasNature="true" isConfigurable="true">
+			<run class="org.ilaborie.less.eclipse.builder.LessBuilder" />
+		</builder>
+	</extension>
+	<extension id="Less" name="Less Project Nature" point="org.eclipse.core.resources.natures">
+		<runtime>
+			<run class="org.ilaborie.less.eclipse.builder.Less" />
+		</runtime>
+		<builder id="org.ilaborie.less.eclipse.LessBuilder" />
+	</extension>
+	<!-- Problems -->
+	<extension id="lessProblem" name="Less Problem" point="org.eclipse.core.resources.markers">
+		<super type="org.eclipse.core.resources.problemmarker" />
+		<persistent value="true"/>
+	</extension>
+	<!-- Commands: Toogle Less Nature -->
+	<extension point="org.eclipse.ui.menus">
+		<menuContribution allPopups="false" locationURI="popup:org.eclipse.ui.projectConfigure">
+			<command commandId="less.eclipse.nature" label="Toggle Less Nature" icon="icons/logo.png" style="push"/>
+		</menuContribution>
+	</extension>
+	<extension point="org.eclipse.ui.commands">
+		<command categoryId="less.eclipse.category" id="less.eclipse.nature" name="Toggle Less Nature"/>
+		<category id="less.eclipse.category" name="Less"/>
+	</extension>
+	<extension point="org.eclipse.ui.handlers">
+		<handler class="org.ilaborie.less.eclipse.handlers.ToggleLessNatureHandler" commandId="less.eclipse.nature"/>
+	</extension>
+	<!-- Content type -->
+	<extension point="org.eclipse.core.contenttype.contentTypes">
+		<content-type base-type="org.eclipse.core.runtime.text" file-extensions="less" id="less.eclipse.content-type" name="Less" priority="normal"/>
+	</extension>
+	<!-- Properties Page -->
+	<extension point="org.eclipse.ui.propertyPages" id="less.eclipse.properties.pages" name="Less Properties">
+		<page class="org.ilaborie.less.eclipse.properties.LessPropertyPage" id="less.eclipse.properties.page" name="Less Compile" >
+			<enabledWhen>
+				<adapt type="org.eclipse.core.resources.IProject">
+					<test property="org.eclipse.core.resources.projectNature" value="org.ilaborie.less.eclipse.Less"/>
+				</adapt>
+			</enabledWhen>
+		</page>
+	</extension>
 </plugin>
